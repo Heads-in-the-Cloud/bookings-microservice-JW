@@ -17,14 +17,20 @@ import com.ss.utopia.entity.BookingPayment;
 import com.ss.utopia.entity.Flight;
 import com.ss.utopia.entity.FlightBookings;
 import com.ss.utopia.entity.Passenger;
+import com.ss.utopia.dao.BookingAgentRepository;
 import com.ss.utopia.dao.BookingPaymentRepository;
 import com.ss.utopia.dao.BookingRepository;
+import com.ss.utopia.dao.BookingUserRepository;
 import com.ss.utopia.dao.FlightBookingsRepository;
 import com.ss.utopia.dao.FlightRepository;
 import com.ss.utopia.dao.PassengerRepository;
 
 @Service
 public class BookingService {
+	@Autowired
+	BookingAgentRepository bookingAgentRepo;
+	@Autowired 
+	BookingUserRepository bookingUserRepo;
 	@Autowired
 	BookingRepository bookingRepo;
 	@Autowired
@@ -71,7 +77,7 @@ public class BookingService {
         return saltStr;
 
 	}
-	public ResponseEntity<String> createBooking(BookingPayment bp, List<Passenger> passengers, List<Integer> flightIds){
+	public ResponseEntity<String> createBooking(BookingPayment bp, List<Passenger> passengers, List<Integer> flightIds, Integer role, Integer id){
 		Booking booking = new Booking();
 		booking.setIs_active(1);
 		String confCode = confCodeGen();
@@ -100,6 +106,12 @@ public class BookingService {
 			fb.setBooking(booking);
 			fb.setFlight(flightExist.get());//?
 			fbRepo.save(fb);
+		}
+		if(role == 2) {
+			bookingAgentRepo.insertVal(booking.getId(),id);
+		}
+		else if(role == 3) {
+			bookingUserRepo.insertVal(booking.getId(),id);
 		}
 		return ResponseEntity.status(HttpStatus.OK).body("Post Successful");
 

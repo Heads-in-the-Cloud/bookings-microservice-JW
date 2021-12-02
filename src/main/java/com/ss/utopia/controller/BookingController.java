@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.sql.SQLException;
 import java.util.List;
 
+import com.ss.utopia.dao.BookingAgentRepository;
 import com.ss.utopia.entity.Booking;
 import com.ss.utopia.entity.BookingPayment;
 import com.ss.utopia.entity.Flight;
@@ -28,7 +30,8 @@ import com.ss.utopia.service.BookingService;
 public class BookingController {
 	@Autowired
 	BookingService bookingService;
-	
+	@Autowired 
+	BookingAgentRepository bookingAgentRepo;
 	@GetMapping
 	public @ResponseBody Iterable<Booking> getBookings(){
 		return bookingService.getBookings();
@@ -53,8 +56,8 @@ public class BookingController {
 		return bookingService.getPassengers();
 	}
 	@PostMapping
-	public @ResponseBody ResponseEntity<String> addBooking(@RequestBody BookingInput input){
-		return bookingService.createBooking(input.getPayment(),input.getPassengers(),input.getFlightIds());
+	public @ResponseBody ResponseEntity<String> addBooking(@RequestBody BookingInput input, @RequestAttribute("role") Integer role, @RequestAttribute("id") Integer id){
+		return bookingService.createBooking(input.getPayment(),input.getPassengers(),input.getFlightIds(), role, id);
 	}
 	
 	@PutMapping
