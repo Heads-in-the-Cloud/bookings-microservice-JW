@@ -17,14 +17,20 @@ import com.ss.utopia.entity.BookingPayment;
 import com.ss.utopia.entity.Flight;
 import com.ss.utopia.entity.FlightBookings;
 import com.ss.utopia.entity.Passenger;
+import com.ss.utopia.dao.BookingAgentRepository;
 import com.ss.utopia.dao.BookingPaymentRepository;
 import com.ss.utopia.dao.BookingRepository;
+import com.ss.utopia.dao.BookingUserRepository;
 import com.ss.utopia.dao.FlightBookingsRepository;
 import com.ss.utopia.dao.FlightRepository;
 import com.ss.utopia.dao.PassengerRepository;
 
 @Service
 public class BookingService {
+	@Autowired
+	BookingAgentRepository bookingAgentRepo;
+	@Autowired 
+	BookingUserRepository bookingUserRepo;
 	@Autowired
 	BookingRepository bookingRepo;
 	@Autowired
@@ -37,6 +43,18 @@ public class BookingService {
 	PassengerRepository passRepo;
 	public Iterable<Booking> getBookings(){
 		return bookingRepo.findAll();
+	}
+	
+	public Iterable<Passenger> getPassengers(){
+		return passRepo.findAll();
+	}
+	
+	public Iterable <BookingPayment> getPayments(){
+		return bpRepo.findAll();
+	}
+	
+	public Iterable <FlightBookings> getFlightBookings(){
+		return fbRepo.findAll();
 	}
 	
 	public ResponseEntity<Booking> getBookingById(Integer id){
@@ -59,7 +77,7 @@ public class BookingService {
         return saltStr;
 
 	}
-	public ResponseEntity<String> createBooking(BookingPayment bp, List<Passenger> passengers, List<Integer> flightIds){
+	public ResponseEntity<String> createBooking(BookingPayment bp, List<Passenger> passengers, List<Integer> flightIds, Integer role, Integer id){
 		Booking booking = new Booking();
 		booking.setIs_active(1);
 		String confCode = confCodeGen();
@@ -74,6 +92,7 @@ public class BookingService {
 		if(booking.getId() != bp.getBookingId()) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("invalid booking_ID for payment");
 		}
+		bp.setRefunded(0);
 		bpRepo.save(bp);
 		for(int j = 0; j<flightIds.size(); j++) {
 			FlightBookings fb = new FlightBookings();
@@ -88,21 +107,36 @@ public class BookingService {
 			fb.setFlight(flightExist.get());//?
 			fbRepo.save(fb);
 		}
+		if(role == 2) {
+			bookingAgentRepo.insertVal(booking.getId(),id);
+		}
+		else if(role == 3) {
+			bookingUserRepo.insertVal(booking.getId(),id);
+		}
 		return ResponseEntity.status(HttpStatus.OK).body("Post Successful");
 
 	}
 	
-	public ResponseEntity<String> updateBooking(Integer id, Booking booking){
+	public ResponseEntity<String> updateBooking(Integer id, Integer activeStatus){
+		if(activeStatus!=0 && activeStatus!=1) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Cannot set active status to this");
+		}
 		Optional<Booking>bookingExist = bookingRepo.findById(id);
 		if(bookingExist.isEmpty()) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Booking with this id does not exist");
 		}
-		bookingRepo.save(booking);
-		Integer isActive = booking.getId();
+		Booking bookingUpdate = bookingExist.get();
+		
+		bookingUpdate.setIs_active(activeStatus);
+		bookingRepo.save(bookingUpdate);
 		BookingPayment updateBookingPayment = bpRepo.getById(id);
-		if(isActive == 0) {
+		if(activeStatus == 0) {
 			updateBookingPayment.setRefunded(1);
 		}
+		else {
+			updateBookingPayment.setRefunded(0);
+		}
+		bpRepo.save(updateBookingPayment);
 		return ResponseEntity.status(HttpStatus.ACCEPTED).body("Update Succeeded");
 		
 	}
