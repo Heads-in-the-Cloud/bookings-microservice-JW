@@ -23,7 +23,7 @@ pipeline {
             steps{
                 echo 'Pushing image to ECR:'
                 script{
-                    docker.withRegistry('902316339693.dkr.ecr.us-east-2.amazonaws.com', 'ecr:us-east-2:jw-aws-cred'){
+                    docker.withRegistry('https://902316339693.dkr.ecr.us-east-2.amazonaws.com', 'ecr:us-east-2:jw-aws-cred'){
                         bookingimage.push()
                     }
                 }
