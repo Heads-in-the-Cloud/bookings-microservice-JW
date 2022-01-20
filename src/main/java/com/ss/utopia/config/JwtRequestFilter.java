@@ -42,6 +42,7 @@ public class JwtRequestFilter extends OncePerRequestFilter{
 		headers.set("Authorization", requestTokenHeader);
 		HttpEntity<String> entity = new HttpEntity<String>(headers);
 		try{
+			logger.info("Trying authorization");
 			ResponseEntity<List> verification = rt.exchange(usersUrl + "/verify", HttpMethod.GET, entity, List.class);
 			Integer role = (Integer)verification.getBody().get(0);
 			Integer id = (Integer)verification.getBody().get(1);
@@ -53,9 +54,11 @@ public class JwtRequestFilter extends OncePerRequestFilter{
 			request.setAttribute("id", id);
 		}catch(HttpClientErrorException e) {
 			response.setStatus(HttpStatus.UNAUTHORIZED.value());
+			logger.error("Unauthorized attempt");
 			return;
 		}catch(Exception e) {
 			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			logger.error("Something went wrong with verification");
 			return;
 		}
 		chain.doFilter(request, response);
