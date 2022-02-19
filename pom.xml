@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.ss</groupId>
-	<artifactId>utopia-bookings-microservice</artifactId>
+	<artifactId>bookings</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>${ptype}</packaging>
-	<name>utopia-bookings-microservice</name>
+	<name>bookings</name>
 	<description>Utopia Admin microservice</description>
 	<properties>
 		<java.version>11</java.version>
