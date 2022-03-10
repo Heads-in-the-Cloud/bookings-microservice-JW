@@ -22,7 +22,7 @@ pipeline {
         }
         stage('Quality gate'){
             steps{
-                waitForQualityGate abortPipeline: false
+                waitForQualityGate abortPipeline: true
             }
         }
         stage('Docker build') {
@@ -46,11 +46,11 @@ pipeline {
                 }
             }
         }
-        // stage('Call docker-compose'){
-        //     steps{
-        //         echo 'Calling docker-compose job'
-        //         build job: 'JW-Docker-Compose'
-        //     }
-        // }
+        stage('Call docker-compose'){
+            steps{
+                echo 'Calling docker-compose job'
+                build job: 'JW-Docker-Compose'
+            }
+        }
     }
 }
