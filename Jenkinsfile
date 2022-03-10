@@ -15,7 +15,9 @@ pipeline {
     stages {
         stage('Sonarqube check'){
             steps{
-                sh"mvn verify sonar:sonar -Dsonar.projectKey=bookings-microservice -Dsonar.host.url=http://ec2-52-14-211-111.us-east-2.compute.amazonaws.com:9000 -Dsonar.login=${params.sonarqubekey}"
+                withSonarQubeEnv('SonarQube'){
+                    sh"mvn verify sonar:sonar -Dsonar.projectKey=bookings-microservice -Dsonar.host.url=http://ec2-52-14-211-111.us-east-2.compute.amazonaws.com:9000 -Dsonar.login=${params.sonarqubekey}"
+                }
             }
         }
         stage('Quality gate'){
