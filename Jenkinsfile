@@ -13,6 +13,16 @@ pipeline {
         jdk 'java' 
     }
     stages {
+        stage('Sonarqube check'){
+            steps{
+                sh"mvn verify sonar:sonar -Dsonar.projectKey=bookings-microservice -Dsonar.host.url=http://ec2-3-136-83-88.us-east-2.compute.amazonaws.com:9000 -Dsonar.login=${params.sonarqubekey}"
+            }
+        }
+        stage('Quality gate'){
+            steps{
+                waitForQualityGate abortPipeline: true
+            }
+        }
         stage('Docker build') {
             steps {
                 echo 'Maven packaging:'
@@ -21,11 +31,6 @@ pipeline {
                 script{
                     bookingimage = docker.build registry + ":bookingimage"
                 }  
-            }
-        }
-        stage('Sonarqube check'){
-            steps{
-                sh"mvn verify sonar:sonar -Dsonar.projectKey=bookings-microservice -Dsonar.host.url=http://ec2-3-136-83-88.us-east-2.compute.amazonaws.com:9000 -Dsonar.login=${params.sonarqubekey}"
             }
         }
         stage('Push Image'){
