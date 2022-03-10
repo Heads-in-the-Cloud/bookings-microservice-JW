@@ -22,7 +22,7 @@ pipeline {
         }
         stage('Quality gate'){
             steps{
-                waitForQualityGate abortPipeline: true
+                waitForQualityGate abortPipeline: false
             }
         }
         stage('Docker build') {
